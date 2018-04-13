@@ -4,7 +4,7 @@ public class PCB {
 	private int id ; 
 	private int expectedExecutionTime ; 
 	private int memorySize ; 
-	private String state  ;
+	private String state  ; //possible states: new, ready, interrupt, io, terminate
 	//IOtime
 	//termination type (0: normal, 1:abnormal, 2:IO)
 	//actual execution time
