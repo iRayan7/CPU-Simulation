@@ -4,7 +4,10 @@ public class PCB {
 	private int id ; 
 	private int expectedExecutionTime ; 
 	private int memorySize ; 
-	private String state  ; 
+	private String state  ;
+	//IOtime
+	//termination type (0: normal, 1:abnormal, 2:IO)
+	//actual execution time
 
 	public PCB ( int id , int expectedExecutionTime , int memorySize , String state ) {
 		this.id = id ; 

@@ -10,6 +10,7 @@ public class OperatingSystem extends TimerTask {
 	private LinkedList<PCB> readyQueue = new LinkedList<PCB> () ; 		// all processes in the ready queue ( should not exceed 132 MB )
 	private LinkedList<PCB> deviceQueue = new LinkedList<PCB> () ; 		// all processes which asked an I/O operation 
 	private LinkedList<PCB> deadQueue = new LinkedList<PCB> () ; 		// all processes which completed their processing
+	//	p = the process imported from the ready queue
 	
 	
 	//starting the operations of the operating system ( most important method )
@@ -36,7 +37,21 @@ public class OperatingSystem extends TimerTask {
 
 	// This method is the actual CPU , it will run once every 1 millisecond
 	public void run() {
-		
+		/*
+		 * if (osready == true){
+		 * 		check if a process is stored in p (the global variable)
+		 * 		generate a random number between 1 and 100
+		 * 		implement the odds (terminate normally, terminate abnormally, terminate in io queue, io request happen's, interrupt happen's)
+		 * 		If one of the odds occur, make p = null. If not, leave the process in p (so that when the next tick the process stays in CPU).
+		 */
 	}
+	
+	//To-Do
+	//getFromReady() every time a process terminates
+	//addToReady() from CPU or device queue
+	//addToIOQueue()
+	//addToDeadQueue(int termination type)
+	//IOOperation() checks the IO queue and terminates the waiting process according to the odds.
+	
 	
 }
