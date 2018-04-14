@@ -3,6 +3,7 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Random;
+import java.util.Collections;
 
 public class OperatingSystem extends TimerTask {
 	
@@ -53,23 +54,20 @@ public class OperatingSystem extends TimerTask {
 				
 				//interrupt chance
 				if(randNum > 0 && randNum <= 10) {
-					p.setState("ready");
 					addToReady(p);
 				}
 				//IO request chance
-				if(randNum > 11 && randNum <= 30) {
-					p.setState("waiting");
+				if(randNum >= 11 && randNum <= 30) {
 					addToIOQueue(p);
 				}
 				//normal termination chance
-				if(randNum > 31 && randNum <= 35) {
-					p.setState("terminated normally");
-					addToDeadQueue(p);
+				if(randNum >= 31 && randNum <= 35) {
+					
+					addToDeadQueue(p, "normally");
 				}
 				//abnormal termination chance
-				if(randNum >36 && randNum <=37) {
-					p.setState("terminated abnormally");
-					addToDeadQueue(p);
+				if(randNum == 36) {
+					addToDeadQueue(p, "abnormally");
 				}
 			}
 		}
@@ -77,10 +75,98 @@ public class OperatingSystem extends TimerTask {
 	
 	//To-Do
 	//getFromReady() every time a process terminates
-	//addToReady() from CPU or device queue
+	//addToReady() from device queue
 	//addToIOQueue()
-	//addToDeadQueue(int termination type)
+	//addToDeadQueue(string termination type)
 	//IOOperation() checks the IO queue and terminates the waiting process according to the odds.
+	
+	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCb with the least memorySize 
+		// 1- sort the readyQueue
+		Collections.sort(readyQueue); 
+		 // 2- return PCB with the least memorySize
+		return readyQueue.getFirst();
+	}
+	
+	public boolean addToReady(PCB process) {
+		// 1- calculate total of memory sizes in readyQueue
+		int readyQueueMemorySizes = 0;
+		for (PCB temp : readyQueue) {
+            readyQueueMemorySizes += temp.getMemorySize();
+        }
+		
+		// 2- if readyQueueMemorySizes + process.memorySize is over the selected amount
+		if( (readyQueueMemorySizes + process.getMemorySize())  > 16384 )  
+			return false;
+		
+		// 3- change state of process to ready
+		process.setState("ready");
+		
+		// 4- add the process to readyQueue
+		readyQueue.add(process); 
+		
+		return true;
+		
+	}
+	
+	public boolean addToIOQueue(PCB process) {
+		// 1- change state to waiting
+		process.setState("waiting");
+		
+		// 2- add to ioQueue
+		deviceQueue.add(process);
+		
+		// 3- sort ioQueue
+		Collections.sort(deviceQueue, new SortByIOtime());
+		
+		return true;
+	}
+	
+	public boolean addToDeadQueue(PCB process,String terminationType) {
+		// 1- delete process from readyQueue, if the process does not exist in readyQueue return false
+		if ( !readyQueue.remove(process) )
+			return false;
+		
+		// 2- change state
+		process.setState("terminate");
+		
+		// 3- change termination type
+		process.setTerminationType(terminationType);
+		
+		// 4- add to deadQueue
+		deadQueue.add(process);
+		
+		return true;
+	}
+	
+	public boolean IOOperation() {
+		// 1- generate a random number
+		Random randGen = new Random();
+		int randomNumber = randGen.nextInt(101);
+		
+		// 2- iterate over deviceQueue and apply the odds
+		for (PCB process : deviceQueue) {
+			if (randomNumber <= 20) {
+				// 1- remove from deviceQueue
+				deviceQueue.remove(process);
+				// 2- add to deadQueue, which will remove it from readyQueue eventually 
+				addToDeadQueue(process, "IO");
+			}
+        }
+		
+		// 3- sort the deviceQueue
+		Collections.sort(deviceQueue, new SortByIOtime());
+		
+		// 4- subtract 1ut from the device been served (first node after sorting)
+		if ( !deviceQueue.isEmpty() ) {
+			PCB current = deviceQueue.getFirst();
+			current.subtractFromIOtime(1);
+		}
+		
+		
+		return true;
+	}
+	
+	
 	
 	
 }

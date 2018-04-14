@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Random;
 
 public class PCBs {
 	
@@ -46,7 +47,11 @@ public class PCBs {
 		CPU = Integer.parseInt( line2[1].split(":")[1] ) ; 
 		RAM = Integer.parseInt( line2[2].split(":")[1] ) ; 
 		
-		PCB newProcess = new PCB ( id , CPU , RAM , "new" ) ; // any process will be added as new process 
+		
+		Random randGen = new Random();
+		int IOtime = randGen.nextInt(100) + 100; //random number between 100 and 200
+
+		PCB newProcess = new PCB ( id , CPU , RAM , "new", IOtime ) ; // any process will be added as new process 
 		
 		return newProcess ; 
 	}
