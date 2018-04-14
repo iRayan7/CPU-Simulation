@@ -49,14 +49,28 @@ public class OperatingSystem extends TimerTask {
 			if(p != null) {
 				p = getFromReady();
 				Random randGen = new Random();
-				int randNum = randGen.nextInt(100) + 1;
+				int randNum = randGen.nextInt(101); //generate random number between 0 (inclusive) and 101 (exclusive).
 				
 				//interrupt chance
 				if(randNum > 0 && randNum <= 10) {
 					p.setState("ready");
 					addToReady(p);
-					
-				}	
+				}
+				//IO request chance
+				if(randNum > 11 && randNum <= 30) {
+					p.setState("waiting");
+					addToIOQueue(p);
+				}
+				//normal termination chance
+				if(randNum > 31 && randNum <= 35) {
+					p.setState("terminated normally");
+					addToDeadQueue(p);
+				}
+				//abnormal termination chance
+				if(randNum >36 && randNum <=37) {
+					p.setState("terminated abnormally");
+					addToDeadQueue(p);
+				}
 			}
 		}
 	}
