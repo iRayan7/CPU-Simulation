@@ -7,7 +7,7 @@ public class PCB implements Comparable<PCB>{
 	private int memorySize ; 
 	private String state  ; //possible states: new, ready, interrupt, io, terminate
 	private int IOtime; //IOtime
-	private String terminationType;//termination type ( none ,normal, abnormal, IO)
+	private String terminationType;//termination type ( none ,normally, abnormally, IO)
 	private int actualExcutionTime; //actual execution time
 
 	public PCB ( int id , int expectedExecutionTime , int memorySize , String state, int IOtime) {

@@ -61,6 +61,17 @@ public class PCBs {
 		JobQueue.add(newProcess) ; 
 	}
 	
+	// used to add a process after changing its state to ready
+	public boolean addReadyProcess ( PCB newProcess ) {
+		
+		if( newProcess.getState().equals("new") )
+			return false;
+		
+		JobQueue.add(newProcess) ; 
+		
+		return true;
+	}
+	
 
 	
 }

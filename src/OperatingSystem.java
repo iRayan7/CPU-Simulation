@@ -8,7 +8,8 @@ import java.util.Collections;
 public class OperatingSystem extends TimerTask {
 	
 	private PCBs Processes = new PCBs () ; 	// the object that holds all the processes ( JobQueue ) 
-	private boolean OSReady = false ; 		// boolean indicates that the CPU can start processing ( it will be true after finishing prepration ) 
+	private boolean OSReady = false ; 		// boolean indicates that the CPU can start processing ( it will be true after finishing prepration )
+	private LinkedList<PCB> jobQueue = Processes.getJobQueue();
 	private LinkedList<PCB> readyQueue = new LinkedList<PCB> () ; 		// all processes in the ready queue ( should not exceed 132 MB )
 	private LinkedList<PCB> deviceQueue = new LinkedList<PCB> () ; 		// all processes which asked an I/O operation 
 	private LinkedList<PCB> deadQueue = new LinkedList<PCB> () ; 		// all processes which completed their processing
@@ -19,7 +20,7 @@ public class OperatingSystem extends TimerTask {
 	public void start () throws IOException {
 
 
-		//////////////////////////////////////// preparing processes to be executed /////////////////////////////////////////
+		//////////////////////////////////////// preparing processes to be executed
 		
 		// loading processes into JobQueue
 		Processes.loadPCBs () ; // will load all processes from text file to the PCBs list
@@ -30,10 +31,32 @@ public class OperatingSystem extends TimerTask {
 		timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 second ) 
 		
 		// fill ready queue 
-//		fillReadyQueue() ; 
+		fillReadyQueue();
 			
-		/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				
+	}
+	
+	
+	//  get PCBs to the readyQueue, till addToReadyQueue method return false
+	public boolean fillReadyQueue() {
+		
+		// 1- flag to exit the loop if the readyQueue is full
+		boolean flag = true;
+		while( flag ) {
+			
+			// 2- remove and return first PCB in jobQueue
+			PCB current = jobQueue.removeFirst();
+			// 3- check if the PCB has "new" state
+			if( current.getState().equals("new")) {
+				//4- addToReady function return true if the process has been added successfully, and false if 
+				flag = addToReady(current);
+			}
+			jobQueue.add(current);
+		}
+		
+		// to check the size
+		System.out.print(readyQueue.size());
+		return true;
 	}
 
 
@@ -72,13 +95,6 @@ public class OperatingSystem extends TimerTask {
 			}
 		}
 	}
-	
-	//To-Do
-	//getFromReady() every time a process terminates
-	//addToReady() from device queue
-	//addToIOQueue()
-	//addToDeadQueue(string termination type)
-	//IOOperation() checks the IO queue and terminates the waiting process according to the odds.
 	
 	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCb with the least memorySize 
 		// 1- sort the readyQueue
@@ -160,11 +176,15 @@ public class OperatingSystem extends TimerTask {
 		if ( !deviceQueue.isEmpty() ) {
 			PCB current = deviceQueue.getFirst();
 			current.subtractFromIOtime(1);
+			// remove if the process completed IOtime
+			if ( current.getIOtime() <= 0 )
+				deviceQueue.remove(current);
 		}
-		
 		
 		return true;
 	}
+	
+	
 	
 	
 	
