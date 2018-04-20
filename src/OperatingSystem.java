@@ -8,17 +8,16 @@ import java.util.Collections;
 public class OperatingSystem extends TimerTask {
 	
 	private PCBs Processes = new PCBs () ; 	// the object that holds all the processes ( JobQueue ) 
-	private boolean OSReady = false ; 		// boolean indicates that the CPU can start processing ( it will be true after finishing prepration )
+	private boolean OSReady = false ; 		// boolean indicates that the CPU can start processing ( it will be true after finishing preparation )
 	private LinkedList<PCB> jobQueue = Processes.getJobQueue();
 	private LinkedList<PCB> readyQueue = new LinkedList<PCB> () ; 		// all processes in the ready queue ( should not exceed 132 MB )
-	private LinkedList<PCB> deviceQueue = new LinkedList<PCB> () ; 		// all processes which asked an I/O operation 
+	private LinkedList<PCB> deviceQueue = new LinkedList<PCB> () ; 		// all processes which asked an I/O operation
 	private LinkedList<PCB> deadQueue = new LinkedList<PCB> () ; 		// all processes which completed their processing
 	private PCB p = null;
 	
 	
 	//starting the operations of the operating system ( most important method )
 	public void start () throws IOException {
-
 
 		//////////////////////////////////////// preparing processes to be executed
 		
@@ -28,12 +27,18 @@ public class OperatingSystem extends TimerTask {
 		
 		// preparing the timer for the method to run every 1 millisecond 
 		Timer timer = new Timer();
-		timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 second ) 
+		timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 millisecond ) 
 		
-		// fill ready queue 
+		// fill ready queue
 		fillReadyQueue();
+		
+		//////////////////////////////////////// preparation finished		
+		
+		// make OSready = true
+		OSReady = true;
 			
-				
+		// execute the simulation run()
+		run();
 	}
 	
 	
@@ -48,7 +53,7 @@ public class OperatingSystem extends TimerTask {
 			PCB current = jobQueue.removeFirst();
 			// 3- check if the PCB has "new" state
 			if( current.getState().equals("new")) {
-				//4- addToReady function return true if the process has been added successfully, and false if 
+				// 4- addToReady function return true if the process has been added successfully, and false if 
 				flag = addToReady(current);
 			}
 			jobQueue.add(current);
@@ -71,24 +76,31 @@ public class OperatingSystem extends TimerTask {
 		 */
 		if(OSReady == true) {
 			if(p != null) {
+				
+				// 1- get the process from readyQueue to CPU
 				p = getFromReady();
+				
+				// 2- set the state to running
+				p.setState("running");
+				
+				// 3- generate a random number for handling interrupt odds
 				Random randGen = new Random();
 				int randNum = randGen.nextInt(101); //generate random number between 0 (inclusive) and 101 (exclusive).
 				
-				//interrupt chance
+				//// interrupt chance
 				if(randNum > 0 && randNum <= 10) {
 					addToReady(p);
 				}
-				//IO request chance
+				//// IO request chance
 				if(randNum >= 11 && randNum <= 30) {
 					addToIOQueue(p);
 				}
-				//normal termination chance
+				//// normal termination chance
 				if(randNum >= 31 && randNum <= 35) {
 					
 					addToDeadQueue(p, "normally");
 				}
-				//abnormal termination chance
+				//// abnormal termination chance
 				if(randNum == 36) {
 					addToDeadQueue(p, "abnormally");
 				}
@@ -96,10 +108,10 @@ public class OperatingSystem extends TimerTask {
 		}
 	}
 	
-	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCb with the least memorySize 
+	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCB with the least memorySize
 		// 1- sort the readyQueue
-		Collections.sort(readyQueue); 
-		 // 2- return PCB with the least memorySize
+		Collections.sort(readyQueue);
+		 // 2- return PCB with the least memorySize, which will be first after sorting readyQueue
 		return readyQueue.getFirst();
 	}
 	
@@ -111,14 +123,14 @@ public class OperatingSystem extends TimerTask {
         }
 		
 		// 2- if readyQueueMemorySizes + process.memorySize is over the selected amount
-		if( (readyQueueMemorySizes + process.getMemorySize())  > 16384 )  
+		if( (readyQueueMemorySizes + process.getMemorySize())  > 16384 )
 			return false;
 		
 		// 3- change state of process to ready
 		process.setState("ready");
 		
 		// 4- add the process to readyQueue
-		readyQueue.add(process); 
+		readyQueue.add(process);
 		
 		return true;
 		

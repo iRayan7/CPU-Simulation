@@ -7,11 +7,30 @@ import java.util.Random;
 public class PCBs {
 	
 	// list of all the processes regarding their state > ( Job Queue ) 
-	private LinkedList<PCB> JobQueue = new LinkedList<PCB>();	
+	private LinkedList<PCB> JobQueue = new LinkedList<PCB>();
 	
 	// returns the linked list of the processes 
-	public LinkedList<PCB> getJobQueue () {
+	public LinkedList<PCB> getJobQueue() {
 		return JobQueue ; 
+	}
+	
+	// returns the number of processes in JobQueue
+	public int getNumberOfProcessesInJobQueue() {
+		return JobQueue.size();
+	}
+	
+	// returns the average process size of all processes in the job queue
+	public int getAverageProcessSize() {
+		int averageProcessSize;
+		int totalProcessesSize = 0;
+		
+		for(PCB process : JobQueue) {
+			totalProcessesSize += process.getMemorySize();
+		}
+		
+		averageProcessSize = totalProcessesSize / JobQueue.size();
+		
+		return averageProcessSize;
 	}
 	
 	// loads all the processes from the text file into the PCBs list
@@ -39,19 +58,19 @@ public class PCBs {
 	// dividing the line that comes from the text file and adding it as a process
 	private PCB dividingText ( String line ) {
 		int id ;
-		int CPU ; 
-		int RAM ; 
+		int expectedExecutionTime ; 
+		int memorySize ; 
 		
 		String line2 [] = line.split(";") ; 
 		id = Integer.parseInt( line2[0].split(":")[1] ) ; 
-		CPU = Integer.parseInt( line2[1].split(":")[1] ) ; 
-		RAM = Integer.parseInt( line2[2].split(":")[1] ) ; 
+		expectedExecutionTime = Integer.parseInt( line2[1].split(":")[1] ) ; 
+		memorySize = Integer.parseInt( line2[2].split(":")[1] ) ; 
 		
 		
 		Random randGen = new Random();
 		int IOtime = randGen.nextInt(100) + 100; //random number between 100 and 200
 
-		PCB newProcess = new PCB ( id , CPU , RAM , "new", IOtime ) ; // any process will be added as new process 
+		PCB newProcess = new PCB ( id , expectedExecutionTime , memorySize , "new", IOtime ) ; // any process will be added as new process 
 		
 		return newProcess ; 
 	}
