@@ -11,10 +11,17 @@ public class main {
 		pcbsObj.loadPCBs();
 		System.out.println("1- Number of Processes in the Job Queue is: " + pcbsObj.getNumberOfProcessesInJobQueue());
 		System.out.println("2- The average program size of all programms is: " + pcbsObj.getAverageProcessSize());
+		
+		// wadah test 
+		OperatingSystem os = new OperatingSystem () ;
+		os.start() ; 
+		
+		
 	}
 	
 	public static void testSortingMethods() {
-LinkedList<PCB> l1 = new LinkedList<PCB>();
+		
+		LinkedList<PCB> l1 = new LinkedList<PCB>();
 		
 		PCB p1 = new PCB ( 1555 , 1 , 3 , "new", 1 ) ;
 		PCB p2 = new PCB ( 1555 , 2 , 1 , "new", 2 ) ;

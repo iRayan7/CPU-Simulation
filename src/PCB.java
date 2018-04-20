@@ -101,7 +101,6 @@ public class PCB implements Comparable<PCB>{
 }
 
 // https://www.tutorialspoint.com/java/java_using_comparator.htm
-
 class SortByIOtime implements Comparator<PCB>
 {
     // Used for sorting in ascending order of
@@ -109,6 +108,16 @@ class SortByIOtime implements Comparator<PCB>
     public int compare(PCB a, PCB b)
     {
         return a.getIOtime() - b.getIOtime();
+    }
+}
+
+class SortByMemorySize implements Comparator<PCB>
+{
+    // Used for sorting in ascending order of
+    // roll number
+    public int compare(PCB a, PCB b)
+    {
+        return a.getMemorySize() - b.getMemorySize();
     }
 }
 

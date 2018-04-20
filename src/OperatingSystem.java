@@ -3,6 +3,7 @@ import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Random;
+import java.util.Arrays;
 import java.util.Collections;
 
 public class OperatingSystem extends TimerTask {
@@ -18,8 +19,11 @@ public class OperatingSystem extends TimerTask {
 	
 	//starting the operations of the operating system ( most important method )
 	public void start () throws IOException {
-
+		
+		
 		//////////////////////////////////////// preparing processes to be executed
+		
+		System.out.println(readyQueue.size());
 		
 		// loading processes into JobQueue
 		Processes.loadPCBs () ; // will load all processes from text file to the PCBs list
@@ -31,6 +35,7 @@ public class OperatingSystem extends TimerTask {
 		
 		// fill ready queue
 		fillReadyQueue();
+		
 		
 		//////////////////////////////////////// preparation finished		
 		
@@ -48,7 +53,8 @@ public class OperatingSystem extends TimerTask {
 		// 1- flag to exit the loop if the readyQueue is full
 		boolean flag = true;
 		while( flag ) {
-			
+			// 1.5- sort the jobQueueAccording to the memory size
+			Collections.sort(jobQueue, new SortByMemorySize());
 			// 2- remove and return first PCB in jobQueue
 			PCB current = jobQueue.removeFirst();
 			// 3- check if the PCB has "new" state
@@ -74,8 +80,11 @@ public class OperatingSystem extends TimerTask {
 		 * 		implement the odds (terminate normally, terminate abnormally, terminate in io queue, io request happen's, interrupt happen's)
 		 * 		If one of the odds occur, make p = null. If not, leave the process in p (so that when the next tick the process stays in CPU).
 		 */
+		
 		if(OSReady == true) {
-			if(p != null) {
+			
+			if (p == null) {
+				
 				
 				// 1- get the process from readyQueue to CPU
 				p = getFromReady();
@@ -90,21 +99,32 @@ public class OperatingSystem extends TimerTask {
 				//// interrupt chance
 				if(randNum > 0 && randNum <= 10) {
 					addToReady(p);
+					p = null ; 
 				}
 				//// IO request chance
 				if(randNum >= 11 && randNum <= 30) {
 					addToIOQueue(p);
+					p = null ; 
 				}
 				//// normal termination chance
 				if(randNum >= 31 && randNum <= 35) {
 					
 					addToDeadQueue(p, "normally");
+					p = null ; 
 				}
 				//// abnormal termination chance
 				if(randNum == 36) {
 					addToDeadQueue(p, "abnormally");
+					p = null  ; 
 				}
-			}
+				
+			} 
+			
+			
+			
+			
+			
+			
 		}
 	}
 	
@@ -125,7 +145,7 @@ public class OperatingSystem extends TimerTask {
 		// 2- if readyQueueMemorySizes + process.memorySize is over the selected amount
 		if( (readyQueueMemorySizes + process.getMemorySize())  > 16384 )
 			return false;
-		
+
 		// 3- change state of process to ready
 		process.setState("ready");
 		
@@ -195,6 +215,8 @@ public class OperatingSystem extends TimerTask {
 		
 		return true;
 	}
+	
+
 	
 	
 	
