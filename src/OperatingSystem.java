@@ -7,7 +7,7 @@ import java.util.Random;
 import java.util.Arrays;
 import java.util.Collections;
 
-public class OperatingSystem extends TimerTask {
+public class OperatingSystem extends TimerTask{
 	
 	private PCBs Processes = new PCBs () ; 	// the object that holds all the processes ( JobQueue ) 
 	private boolean OSReady = false ; 		// boolean indicates that the CPU can start processing ( it will be true after finishing preparation )
@@ -22,24 +22,24 @@ public class OperatingSystem extends TimerTask {
 	//starting the operations of the operating system ( most important method )
 	public void start () throws IOException {
 		
+		// preparing the timer for the method to run every 1 millisecond 
+				Timer timer = new Timer();
+				timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 millisecond )
+		
 		
 		//////////////////////////////////////// preparing processes to be executed
 		
-		System.out.println(readyQueue.size());
-		
 		// loading processes into JobQueue
-		Processes.loadPCBs () ; // will load all processes from text file to the PCBs list
+		Processes.loadPCBs (); // will load all processes from text file to the PCBs list
 		
 		copyList(jobQueue, jobQueueCopy);
 		
 		// sort the jobQueueCopy according to the memory size
 		Collections.sort(jobQueueCopy, new SortByMemorySize());
 		
-		System.out.println(Processes.getJobQueue().size() ); // check
-		
-		// preparing the timer for the method to run every 1 millisecond 
-		Timer timer = new Timer();
-		timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 millisecond ) 
+//		// preparing the timer for the method to run every 1 millisecond 
+//		Timer timer = new Timer();
+//		timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 millisecond ) 
 		
 		// fill ready queue
 		fillReadyQueue();
@@ -52,7 +52,7 @@ public class OperatingSystem extends TimerTask {
 		// make OSready = true
 		OSReady = true;
 		
-		run();
+		
 	}
 	
 	
@@ -83,58 +83,58 @@ public class OperatingSystem extends TimerTask {
 		 * 		implement the odds (terminate normally, terminate abnormally, terminate in io queue, io request happen's, interrupt happen's)
 		 * 		If one of the odds occur, make p = null. If not, leave the process in p (so that when the next tick the process stays in CPU).
 		 */
-		
-		if(OSReady == true) {
-			
+		//if(OSReady == true) {
 			System.out.println("hello");
 			
-			if (p == null) {
-				
-				
-				// 1- get the process from readyQueue to CPU
-				p = getFromReady();
-				
-				// 2- set the state to running
-				p.setState("running");
-				
-				// 3- generate a random number for handling interrupt odds
-				Random randGen = new Random();
-				int randNum = randGen.nextInt(100) + 1; //generate random number between 0 (inclusive) and 101 (exclusive).
-				
-				//// interrupt chance
-				if(randNum > 0 && randNum <= 10) {
-					addToReady(p);
-					p = null ; 
-				}
-				//// IO request chance
-				if(randNum >= 11 && randNum <= 30) {
-					addToIOQueue(p);
-					p = null ; 
-				}
-				
-				//// normal termination chance
-				if(randNum >= 31 && randNum <= 35) {
-					
-					addToDeadQueue(p, "normally");
-					p = null;
-				}
-				//// abnormal termination chance
-				if(randNum == 36) {
-					addToDeadQueue(p, "abnormally");
-					p = null;
-				}
-				
-				p.setActualExcutionTime(p.getActualExcutionTime()+1); //increment actualExcutionTime
-				
-			} 
-			
-			
-			
-			
-			
-			
+//			if (p == null) {
+//				
+//				
+//				// 1- get the process from readyQueue to CPU
+//				p = getFromReady();
+//				
+//				// 2- set the state to running
+//				p.setState("running");
+//				
+//				// 3- generate a random number for handling interrupt odds
+//				Random randGen = new Random();
+//				int randNum = randGen.nextInt(100) + 1; //generate random number between 0 (inclusive) and 101 (exclusive).
+//				
+//				System.out.println(randNum);
+//				
+//				//// interrupt chance
+//				if(randNum > 0 && randNum <= 10) {
+//					addToReady(p);
+//					p = null ; 
+//				}
+//				//// IO request chance
+//				if(randNum >= 11 && randNum <= 30) {
+//					addToIOQueue(p);
+//					p = null ; 
+//				}
+//				
+//				//// normal termination chance
+//				if(randNum >= 31 && randNum <= 35) {
+//					
+//					addToDeadQueue(p, "normally");
+//					p = null;
+//				}
+//				//// abnormal termination chance
+//				if(randNum == 36) {
+//					addToDeadQueue(p, "abnormally");
+//					p = null;
+//				}
+//				
+//				p.setActualExcutionTime(p.getActualExcutionTime()+1); //increment actualExcutionTime
+//				
+//			} 
+//			
+//			
+//			
+//			
+//			
+//			
 		}
-	}
+	//}
 	
 	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCB with the least memorySize
 		 // 1- return PCB with the least memorySize, which will be first after sorting readyQueue
