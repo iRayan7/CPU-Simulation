@@ -1,4 +1,5 @@
 import java.util.Comparator;
+import java.util.Random;
 
 public class PCB implements Comparable<PCB>{
 	
@@ -7,6 +8,7 @@ public class PCB implements Comparable<PCB>{
 	private int memorySize;
 	private String state; //possible states: new, running, ready, interrupt, io, terminate
 	private int IOtime; //IOtime
+	private int actualIOTime;
 	private String terminationType; //termination type ( "none" initial type , "normally" , "abnormally" , "IO" )
 	private int actualExcutionTime; //actual execution time
 
@@ -16,10 +18,12 @@ public class PCB implements Comparable<PCB>{
 		this.memorySize = memorySize ; 
 		this.state = state ; 
 		
-		this.IOtime = IOtime;
+		Random rand = new Random();
+		this.IOtime = rand.nextInt(200) + 100;
 		
 		this.terminationType = "none";
-		this.setActualExcutionTime(0);
+		this.actualExcutionTime = 0;
+		this.actualIOTime = 0;
 	}
 	
 	
@@ -105,6 +109,16 @@ public class PCB implements Comparable<PCB>{
 
 	public void setActualExcutionTime(int actualExcutionTime) {
 		this.actualExcutionTime = actualExcutionTime;
+	}
+
+
+	public int getActualIOTime() {
+		return actualIOTime;
+	}
+
+
+	public void setActualIOTime(int actualIOTime) {
+		this.actualIOTime = actualIOTime;
 	}
 
 	

@@ -9,8 +9,8 @@ public class main {
 	public static void main(String[] args) throws IOException {
 		PCBs pcbsObj = new PCBs();
 		pcbsObj.loadPCBs();
-		System.out.println("1- Number of Processes in the Job Queue is: " + pcbsObj.getNumberOfProcessesInJobQueue());
-		System.out.println("2- The average program size of all programms is: " + pcbsObj.getAverageProcessSize());
+//		System.out.println("1- Number of Processes in the Job Queue is: " + pcbsObj.getNumberOfProcessesInJobQueue());
+//		System.out.println("2- The average program size of all programms is: " + pcbsObj.getAverageProcessSize());
 		
 		// wadah test 
 		OperatingSystem os = new OperatingSystem () ;
