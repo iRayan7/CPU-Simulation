@@ -19,7 +19,7 @@ public class PCB implements Comparable<PCB>{
 		this.IOtime = IOtime;
 		
 		this.terminationType = "none";
-		this.actualExcutionTime = 0;
+		this.setActualExcutionTime(0);
 	}
 	
 	
@@ -94,7 +94,17 @@ public class PCB implements Comparable<PCB>{
 
 
 	public void addToActualExcutionTime(int amount) {
-		this.actualExcutionTime += amount;
+		this.setActualExcutionTime(this.getActualExcutionTime() + amount);
+	}
+
+
+	public int getActualExcutionTime() {
+		return actualExcutionTime;
+	}
+
+
+	public void setActualExcutionTime(int actualExcutionTime) {
+		this.actualExcutionTime = actualExcutionTime;
 	}
 
 	

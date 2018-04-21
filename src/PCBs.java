@@ -35,7 +35,7 @@ public class PCBs {
 	
 	// loads all the processes from the text file into the PCBs list
 	public void loadPCBs() throws IOException {
-		BufferedReader br = new BufferedReader(new FileReader("C:\\Process.txt"));
+		BufferedReader br = new BufferedReader(new FileReader("//Users//alobaili//Projects//OS//processes.txt"));
 		try {
 		    StringBuilder sb = new StringBuilder();
 		    String line = br.readLine();

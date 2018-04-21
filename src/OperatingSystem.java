@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
+
 import java.util.Random;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,6 +15,7 @@ public class OperatingSystem extends TimerTask {
 	private LinkedList<PCB> readyQueue = new LinkedList<PCB> () ; 		// all processes in the ready queue ( should not exceed 132 MB )
 	private LinkedList<PCB> deviceQueue = new LinkedList<PCB> () ; 		// all processes which asked an I/O operation
 	private LinkedList<PCB> deadQueue = new LinkedList<PCB> () ; 		// all processes which completed their processing
+	private LinkedList<PCB> jobQueueCopy = new LinkedList<PCB>();
 	private PCB p = null;
 	
 	
@@ -27,6 +29,12 @@ public class OperatingSystem extends TimerTask {
 		
 		// loading processes into JobQueue
 		Processes.loadPCBs () ; // will load all processes from text file to the PCBs list
+		
+		copyList(jobQueue, jobQueueCopy);
+		
+		// sort the jobQueueCopy according to the memory size
+		Collections.sort(jobQueueCopy, new SortByMemorySize());
+		
 		System.out.println(Processes.getJobQueue().size() ); // check
 		
 		// preparing the timer for the method to run every 1 millisecond 
@@ -36,13 +44,14 @@ public class OperatingSystem extends TimerTask {
 		// fill ready queue
 		fillReadyQueue();
 		
-		
+//		for(PCB process : readyQueue) {
+//			System.out.println(process.getExpectedExecutionTime());
+//		}
 		//////////////////////////////////////// preparation finished		
 		
 		// make OSready = true
 		OSReady = true;
-			
-		// execute the simulation run()
+		
 		run();
 	}
 	
@@ -53,20 +62,14 @@ public class OperatingSystem extends TimerTask {
 		// 1- flag to exit the loop if the readyQueue is full
 		boolean flag = true;
 		while( flag ) {
-			// 1.5- sort the jobQueueAccording to the memory size
-			Collections.sort(jobQueue, new SortByMemorySize());
 			// 2- remove and return first PCB in jobQueue
-			PCB current = jobQueue.removeFirst();
+			PCB current = jobQueueCopy.removeFirst();
 			// 3- check if the PCB has "new" state
 			if( current.getState().equals("new")) {
 				// 4- addToReady function return true if the process has been added successfully, and false if 
 				flag = addToReady(current);
 			}
-			jobQueue.add(current);
 		}
-		
-		// to check the size
-		System.out.print(readyQueue.size());
 		return true;
 	}
 
@@ -83,6 +86,8 @@ public class OperatingSystem extends TimerTask {
 		
 		if(OSReady == true) {
 			
+			System.out.println("hello");
+			
 			if (p == null) {
 				
 				
@@ -94,7 +99,7 @@ public class OperatingSystem extends TimerTask {
 				
 				// 3- generate a random number for handling interrupt odds
 				Random randGen = new Random();
-				int randNum = randGen.nextInt(101); //generate random number between 0 (inclusive) and 101 (exclusive).
+				int randNum = randGen.nextInt(100) + 1; //generate random number between 0 (inclusive) and 101 (exclusive).
 				
 				//// interrupt chance
 				if(randNum > 0 && randNum <= 10) {
@@ -106,17 +111,20 @@ public class OperatingSystem extends TimerTask {
 					addToIOQueue(p);
 					p = null ; 
 				}
+				
 				//// normal termination chance
 				if(randNum >= 31 && randNum <= 35) {
 					
 					addToDeadQueue(p, "normally");
-					p = null ; 
+					p = null;
 				}
 				//// abnormal termination chance
 				if(randNum == 36) {
 					addToDeadQueue(p, "abnormally");
-					p = null  ; 
+					p = null;
 				}
+				
+				p.setActualExcutionTime(p.getActualExcutionTime()+1); //increment actualExcutionTime
 				
 			} 
 			
@@ -129,10 +137,8 @@ public class OperatingSystem extends TimerTask {
 	}
 	
 	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCB with the least memorySize
-		// 1- sort the readyQueue
-		Collections.sort(readyQueue);
-		 // 2- return PCB with the least memorySize, which will be first after sorting readyQueue
-		return readyQueue.getFirst();
+		 // 1- return PCB with the least memorySize, which will be first after sorting readyQueue
+		return readyQueue.removeFirst();
 	}
 	
 	public boolean addToReady(PCB process) {
@@ -143,7 +149,7 @@ public class OperatingSystem extends TimerTask {
         }
 		
 		// 2- if readyQueueMemorySizes + process.memorySize is over the selected amount
-		if( (readyQueueMemorySizes + process.getMemorySize())  > 16384 )
+		if( (readyQueueMemorySizes + process.getMemorySize())  > 160000 )
 			return false;
 
 		// 3- change state of process to ready
@@ -151,6 +157,9 @@ public class OperatingSystem extends TimerTask {
 		
 		// 4- add the process to readyQueue
 		readyQueue.add(process);
+		
+		// 5- sort the readyQueue
+		Collections.sort(readyQueue, new SortByExpectedExecutionTime());
 		
 		return true;
 		
@@ -182,6 +191,9 @@ public class OperatingSystem extends TimerTask {
 		
 		// 4- add to deadQueue
 		deadQueue.add(process);
+		
+		// 5- add another process to readyQueue if there's space
+		fillReadyQueue();
 		
 		return true;
 	}
@@ -216,6 +228,11 @@ public class OperatingSystem extends TimerTask {
 		return true;
 	}
 	
+	private void copyList(LinkedList<PCB> l1, LinkedList<PCB> l2) {
+		for(int i = 0; i<l1.size(); i++) {
+			l2.add(l1.get(i));
+		}
+	}
 
 	
 	
