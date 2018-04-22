@@ -11,26 +11,7 @@ public class PCBs {
 	
 	// returns the linked list of the processes 
 	public LinkedList<PCB> getJobQueue() {
-		return JobQueue ; 
-	}
-	
-	// returns the number of processes in JobQueue
-	public int getNumberOfProcessesInJobQueue() {
-		return JobQueue.size();
-	}
-	
-	// returns the average process size of all processes in the job queue
-	public int getAverageProcessSize() {
-		int averageProcessSize;
-		int totalProcessesSize = 0;
-		
-		for(PCB process : JobQueue) {
-			totalProcessesSize += process.getMemorySize();
-		}
-		
-		averageProcessSize = totalProcessesSize / JobQueue.size();
-		
-		return averageProcessSize;
+		return JobQueue;
 	}
 	
 	// loads all the processes from the text file into the PCBs list

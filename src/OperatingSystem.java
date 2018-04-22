@@ -16,14 +16,11 @@ public class OperatingSystem{
 	private LinkedList<PCB> deviceQueue = new LinkedList<PCB> () ; 		// all processes which asked an I/O operation
 	private LinkedList<PCB> deadQueue = new LinkedList<PCB> () ; 		// all processes which completed their processing
 	private LinkedList<PCB> jobQueueCopy = new LinkedList<PCB>();
-	private PCB p = null;
+	private PCB processInCPU = null;
 	
 	
 	//starting the operations of the operating system ( most important method )
 	public void start () throws IOException {
-		
-		
-		//////////////////////////////////////// preparing processes to be executed
 		
 		// loading processes into JobQueue
 		Processes.loadPCBs (); // will load all processes from text file to the PCBs list
@@ -32,102 +29,151 @@ public class OperatingSystem{
 		
 		// sort the jobQueueCopy according to the memory size
 		Collections.sort(jobQueueCopy, new SortByMemorySize());
-		
-//		// preparing the timer for the method to run every 1 millisecond 
-//		Timer timer = new Timer();
-//		timer.schedule(new OperatingSystem() , 0, 1 ); // the method run ( will run every 1 millisecond ) 
+	
 		
 		// fill ready queue
 		fillReadyQueue();
 		
-//		for(PCB process : readyQueue) {
-//			System.out.println(process.getExpectedExecutionTime());
-//		}
-		//////////////////////////////////////// preparation finished		
+
+		////////////// preparation finished  //////////////
 		
-		// make OSready = true
-		OSReady = true;
-		
-		////////////////////////////////////////////////// all in start ///////////////
+		//////////////////////////// Starting The Operating System Simulation ////////////////////////////////
 		int counter = 1;
-		//System.out.println("hello");
-		System.out.println("ready queue size: " + readyQueue.size());
-		System.out.println("job queue copy size: " + jobQueueCopy.size());
+		while( deadQueue.size() != 3000 ) {
+//		for ( int i = 0 ; i < 50 ; i++ ) {
+			
+			////////////////////////// CPU start ////////////////////////
+
+			counter ++ ; 
+			// the method that will start the CPU operation / counter > to count the number of iterations
+			CPUOperation(counter);
+			
+			/////////////////////////// OI start ////////////////////////
+				
+			// the method that will start the I/O operation 
+			IOOperation(); 
+			
+		}
 		
-		while(counter != -1 ) {
+		///////////////////////////////////////////////////////////////////////////////////////////////////////
+
+		
+		System.out.println("<<<<< Program Ended Execution >>>>>");
+		System.out.println("* 1 - Number of Processes in the Job Queue is : " + jobQueue.size());
+		System.out.println("* 2 - The average program size of all program is : " + getAverageProcessSize());
+		System.out.println("* 3 - The number of process that terminated abnormally : " + getNumberOfDead("abnormally") ) ;
+		System.out.println("* 4 - The number of process that terminated normally : " + getNumberOfDead("normally") );
+		System.out.println("* 5 - The number of CPU bound processes : " + getNumberOfCPU() );
+		System.out.println("* ");
+		System.out.println("* More Information :: ");
+		System.out.println("* Number of iterations it took to finish the program " + --counter );
+		System.out.println("* The number of process in ready state : " + getNumOfState("ready") );
+		System.out.println("* The number of process in waiting state : " + getNumOfState("waiting") );
+		System.out.println("* The number of process in terminated state : " + getNumOfState("terminate") );
+		System.out.println("* The number of process left to be executed : " + jobQueueCopy.size());
+		System.out.println("* The number of peocess that terminated while it was in IO operation : " + getNumberOfDead("IO") );
+		System.out.println("* The number of I/O bound processes : " + ( 3000 - getNumberOfCPU() ) );
+		System.out.println();
+		
+	}
+
+	private void CPUOperation( int counter ) {
+		
+		// generate a random number for handling interrupt odds
+		Random randGen = new Random();
+		int randNum = randGen.nextInt(100) + 1; //generate random number between 0 (inclusive) and 101 (exclusive).
+		
+			// get the process from readyQueue to CPU
+			if ( processInCPU == null ) {
+				processInCPU = getFromReady();
+			}
 			
-			// 3- generate a random number for handling interrupt odds
-			Random randGen = new Random();
-			int randNum = randGen.nextInt(100) + 1; //generate random number between 0 (inclusive) and 101 (exclusive).
-			
-//			System.out.println(jobQueueCopy.size());
-			
-			
-			
+			if(processInCPU != null) {
+				processInCPU.setActualExcutionTime(processInCPU.getActualExcutionTime()+1); //increment actualExcutionTime
 				
-				if(readyQueue.size() == 0) {
-					counter = -1;
-					continue;
+				// set the state to running
+				processInCPU.setState("running");
+				
+				System.out.println( "/////////////////// Step " + counter + "  /////////////////// " );
+				System.out.println("* The generated random number generated random number : " + randNum);
+				System.out.println("* The number of process left to be executed : " + jobQueueCopy.size());
+				System.out.println("* The number of process in ready state : " + getNumOfState("ready") );
+				System.out.println("* The number of process in waiting state : " + getNumOfState("waiting") );
+				System.out.println("* The number of process in terminated state : " + getNumOfState("terminate") );
+
+				System.out.println((processInCPU != null ? "* There is a process in the CPU" : "* There is no process in the CPU"));
+				int memorySize = 0 ; 
+				for ( PCB process : readyQueue ) {
+					memorySize += process.getMemorySize();
+				}
+				for ( PCB process : deviceQueue ) {
+					memorySize += process.getMemorySize();
 				}
 				
-				// 1- get the process from readyQueue to CPU
-				if ( p == null ) {
-					p = getFromReady();
-				}
-				
-				p.setActualExcutionTime(p.getActualExcutionTime()+1); //increment actualExcutionTime
-				System.out.println(counter++ + " ) process ID: " + p.getId());
-				System.out.println("generated random number: " + randNum);
-				System.out.println("ready queue size: " + readyQueue.size());
-				System.out.println("job queue copy size: " + jobQueueCopy.size());
-				System.out.println("dead queue size: " + deadQueue.size());
-				System.out.println("device queue size: " + deviceQueue.size());
+				memorySize += processInCPU.getMemorySize(); 
+					
+				System.out.println("* The actual size in the memory is :" + memorySize);
+				System.out.println("////////////////////////////////////////////////////");
 				System.out.println();
-				
-				// 2- set the state to running
-				p.setState("running");
+
 				
 				//// interrupt chance
 				if(randNum > 0 && randNum <= 10) {
-					addToReady(p);
-					p = null ;
+					addToReady(processInCPU);
+					processInCPU = null ;
 				}
 				//// IO request chance **not completed**
 				if(randNum >= 11 && randNum <= 30) {
-					addToIOQueue(p);
-					p = null ;
+					addToIOQueue(processInCPU);
+					processInCPU = null ;
 				}
 				
 				//// normal termination chance
 				if(randNum >= 31 && randNum <= 35) {
 					
-					addToDeadQueue(p, "normally");
-					p = null;
+					addToDeadQueue(processInCPU, "normally");
+					processInCPU = null;
 				}
 				//// abnormal termination chance
 				if(randNum == 36) {
-					addToDeadQueue(p, "abnormally");
-					p = null;
+					addToDeadQueue(processInCPU, "abnormally");
+					processInCPU = null;
 				}
-				if(randNum > 36) {
-					continue;
-				}
-				
-				
-				
-			
-			
-			/////////////////////////// OI start ////////////////////////
-			
-			IOOperation();
-			
-		}
-		
-		System.out.println("out");
-		
+			}
 	}
 	
-	
+	private int getNumOfState(String string) {
+		int sum = 0 ; 
+		for ( PCB process : jobQueue ) {
+			if ( process.getState().equals(string) ) {
+				sum ++ ; 
+			}
+			
+		}
+		return sum;
+	}
+
+	private int getNumberOfCPU() {
+		int sum = 0 ; 
+		for ( PCB process : jobQueue ) {
+			if ( process.getActualExcutionTime() > process.getActualIOTime() ) {
+				sum ++ ; 
+			}
+		}
+		return sum ;
+	}
+
+	private int getNumberOfDead(String string) {
+		int sum = 0 ; 
+		for ( PCB process : jobQueue ) {
+			if ( process.getTerminationType().equals(string) ) {
+				sum ++ ; 
+			}
+			
+		}
+		return sum;
+	}
+
 	//  get PCBs to the readyQueue, till addToReadyQueue method return false
 	public boolean fillReadyQueue() {
 		
@@ -148,103 +194,46 @@ public class OperatingSystem{
 		}
 		return true;
 	}
-
-
-	// This method is the actual CPU , it will run once every 1 millisecond
-	//public void run() {
-		/*
-		 * if (OSReady == true){
-		 * 		check if a process is stored in p (the global variable)
-		 * 		generate a random number between 1 and 100
-		 * 		implement the odds (terminate normally, terminate abnormally, terminate in io queue, io request happen's, interrupt happen's)
-		 * 		If one of the odds occur, make p = null. If not, leave the process in p (so that when the next tick the process stays in CPU).
-		 */
-		//if(OSReady == true) {
-			//System.out.println("hello");
-			
-//			if (p == null) {
-//				
-//				
-//				// 1- get the process from readyQueue to CPU
-//				p = getFromReady();
-//				
-//				// 2- set the state to running
-//				p.setState("running");
-//				
-//				// 3- generate a random number for handling interrupt odds
-//				Random randGen = new Random();
-//				int randNum = randGen.nextInt(100) + 1; //generate random number between 0 (inclusive) and 101 (exclusive).
-//				
-//				System.out.println(randNum);
-//				
-//				//// interrupt chance
-//				if(randNum > 0 && randNum <= 10) {
-//					addToReady(p);
-//					p = null ; 
-//				}
-//				//// IO request chance
-//				if(randNum >= 11 && randNum <= 30) {
-//					addToIOQueue(p);
-//					p = null ; 
-//				}
-//				
-//				//// normal termination chance
-//				if(randNum >= 31 && randNum <= 35) {
-//					
-//					addToDeadQueue(p, "normally");
-//					p = null;
-//				}
-//				//// abnormal termination chance
-//				if(randNum == 36) {
-//					addToDeadQueue(p, "abnormally");
-//					p = null;
-//				}
-//				
-//				p.setActualExcutionTime(p.getActualExcutionTime()+1); //increment actualExcutionTime
-//				
-//			} 
-//			
-//			
-//			
-//			
-//			
-//			
-		//}
-	//}
 	
 	public PCB getFromReady() { // get PCB from readyQueue after sorting it, it will return PCB with the least memorySize
 		
-		
+		if(readyQueue.isEmpty()) {
+			return null;
+		}
 		// 1- return PCB with the least memorySize, which will be first after sorting readyQueue
 		return readyQueue.removeFirst();
 	}
 	
 	public boolean addToReady(PCB process) {
+		
+		// ******** check if there is enough space in RAM (remember, RAM size is 160MB).
 		// 1- calculate total of memory sizes in readyQueue
 		int readyQueueMemorySizes = 0;
 		for (PCB temp : readyQueue) {
             readyQueueMemorySizes += temp.getMemorySize();
         }
-		// 1- calculate total of memory sizes in ioQueue
-				int ioQueueMemorySizes = 0;
-				for (PCB temp : deviceQueue) {
-		            ioQueueMemorySizes += temp.getMemorySize();
-		        }
+		// 2- calculate total of memory sizes in deviceQueue
+		int deviceQueueMemorySizes = 0;
+		for (PCB temp : deviceQueue) {
+            deviceQueueMemorySizes += temp.getMemorySize();
+        }
 				
-		// 2- if readyQueueMemorySizes + process.memorySize is over the selected amount
-		if( (readyQueueMemorySizes + process.getMemorySize() + ioQueueMemorySizes)  > 160000 ) {
+		// 3- check if readyQueueMemorySizes + deviceQueueMemorySizes + process + processInCPU size is over 160MB
+		//    if it is, add process to jobQueue and sort it again by memory size.
+		if( (readyQueueMemorySizes + deviceQueueMemorySizes + process.getMemorySize() + ( (processInCPU != null) ? processInCPU.getMemorySize():( 0 ) ) > 160000 ) ) {
 			jobQueueCopy.add(process);
 			Collections.sort(jobQueueCopy, new SortByMemorySize());
 			return false;
 		}
-
-		// 3- change state of process to ready
+		// ******** at this point, there is actually enough space in RAM, so add process safely to readyQueue
+		
+		// 4- change state of process to ready
 		process.setState("ready");
 		
-		// 4- add the process to readyQueue
+		// 5- add the process to readyQueue
 		readyQueue.add(process);
 		
-		// 5- sort the readyQueue
+		// 6- sort the readyQueue again
 		Collections.sort(readyQueue, new SortByExpectedExecutionTime());
 		
 		return true;
@@ -289,22 +278,30 @@ public class OperatingSystem{
 	}
 	
 	public boolean IOOperation() {
-		if(deviceQueue.size() != 0) {
-			// 1- generate a random number
+		if(!deviceQueue.isEmpty()) { // if deviceQueue is not empty
+			
+			// 1- generate a random number between 0 and 100
 			Random randGen = new Random();
 			int randomNumber = randGen.nextInt(101);
 			
-			PCB process = deviceQueue.getFirst();
-			process.setActualIOTime(process.getActualExcutionTime()+1);
-			 
-			if (randomNumber <= 20) {
-		
-				// 1- remove from deviceQueue
-				process = deviceQueue.removeFirst();
-				
-				// 2- add to deadQueue, which will remove it from readyQueue eventually 
+			// 2- pull the fist element in deviceQueue and increment its actualIOTime by one ut.
+			PCB process = deviceQueue.removeFirst();
+			process.setActualIOTime(process.getActualIOTime()+1);
+			
+			// 3- there's a 20% chance that it will terminate, so setup this chance to occur,
+			//    and when it does, return the process to the IO queue.
+			if (process.getActualIOTime() == process.getIOtime()) {
+				// 2- return the process to readyQueue 
 				addToReady(process);
 			}
+			
+			else if(randomNumber <= 20) {
+				addToDeadQueue(process, "IO");
+//				addToReady(process);
+			}
+			
+			else
+				deviceQueue.addFirst(process);
 		}
 		
 		return true;
@@ -315,11 +312,19 @@ public class OperatingSystem{
 			l2.add(process);
 		}
 	}
-
 	
-	
-	
-	
-	
+	// returns the average process size of all processes in the job queue
+		public int getAverageProcessSize() {
+			int averageProcessSize;
+			int totalProcessesSize = 0;
+			
+			for(PCB process : jobQueue) {
+				totalProcessesSize += process.getMemorySize();
+			}
+			
+			averageProcessSize = totalProcessesSize / jobQueue.size();
+			
+			return averageProcessSize;
+		}
 	
 }
