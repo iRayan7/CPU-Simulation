@@ -73,6 +73,9 @@ public class OperatingSystem{
 		System.out.println("* The number of process left to be executed : " + jobQueueCopy.size());
 		System.out.println("* The number of peocess that terminated while it was in IO operation : " + getNumberOfDead("IO") );
 		System.out.println("* The number of I/O bound processes : " + ( 3000 - getNumberOfCPU() ) );
+		System.out.println("* The average number of jobs that have completed their execution normally: " + (getNumberOfDead("normally") / 3000.0)*100 + "%");
+		System.out.println("* The average number of jobs that have completed their execution abnormally: " + (getNumberOfDead("abnormally") / 3000.0)*100 + "%");
+
 		System.out.println();
 		
 	}
@@ -296,8 +299,8 @@ public class OperatingSystem{
 			}
 			
 			else if(randomNumber <= 20) {
-				addToDeadQueue(process, "IO");
-//				addToReady(process);
+//				addToDeadQueue(process, "IO");
+				addToReady(process);
 			}
 			
 			else
